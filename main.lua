@@ -37,22 +37,26 @@ function Grid:draw()
 		for j=1,self.y,1 do
 			if(self.mt[i][j].state == 0) then
 				love.graphics.setColor (255, 255, 255)
-				love.graphics.rectangle("fill", i*20, j*20, 15, 15)
+				love.graphics.rectangle("fill", i*20, j*20, 20, 20)
 			elseif(self.mt[i][j].state == 1) then
 				love.graphics.setColor (0,0,0)
-				love.graphics.rectangle("fill", i*20, j*20, 15, 15)
-			else
-				love.graphics.print("Something done goofed son")
-			end
+				love.graphics.rectangle("fill", i*20, j*20, 20, 20)
+				end
 		end
 	end
 end
 
---function Grid:check(x,y)
---	for i=1,self.x,1 do
---		for j=1,self.y,1 do
---		--pick up here looking for what cell just got clicked
---			if(self.mt[i][j]
+function Grid:check(x,y)
+	if x > 20 and x < self.x * 20 then
+		if y > 20 and y < self.y * 20 then
+			if self.mt[math.floor(x/20)][math.floor(y/20)].state == 0 then	
+				self.mt[math.floor(x/20)][math.floor(y/20)].state = 10
+			else
+				self.mt[math.floor(x/20)][math.floor(y/20)].state = 0
+			end
+		end
+	end
+end
 Updater = Class{
 	init = function(self, x, y)
 	self.x = x
@@ -71,7 +75,7 @@ function paused:keyreleased(key)
 	end
 end
 function paused:draw()
-	love.graphics.print("Press space to begin",10,10)
+	love.graphics.print("Press space to begin",10,8)
 	lifeLand:draw()
 end
 
@@ -82,9 +86,13 @@ function running:keyreleased(key)
 	Gamestate.switch(paused)
 	end
 end
-
+function paused:mousepressed(x,y, mouse_btn)
+	if mouse_btn == 'l' then
+		lifeLand:check(x,y)
+	end
+end
 function running:draw()
-	love.graphics.print("Game Running do stuff here",10,10)
+	love.graphics.print("Game Running do stuff here",10,8)
 	lifeLand:draw()
 end
 function love.load()
@@ -94,13 +102,6 @@ function love.load()
 	
 end
 
-function love.mousepressed (x, y, button)
-	--if button == "l" then
-	--	lifeLand:check(x,y)
-	--	end
-	--end
-end
-	
 function love.update(dt)
 
 
