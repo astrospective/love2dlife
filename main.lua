@@ -1,5 +1,5 @@
-Gamestate = require "hump.gamestate"
-Class = require "hump.class"
+Gamestate = require "libs.hump.gamestate"
+Class = require "libs.hump.class"
 Cube =  Class{
 	init = function(self, x, y, state)
 	self.x = x
@@ -48,11 +48,11 @@ function Grid:draw()
 	end
 end
 
-function Grid:check(x,y)
-	for i=1,self.x,1 do
-		for j=1,self.y,1 do
-		--pick up here looking for what cell just got clicked
-			if(self.mt[i][j]
+--function Grid:check(x,y)
+--	for i=1,self.x,1 do
+--		for j=1,self.y,1 do
+--		--pick up here looking for what cell just got clicked
+--			if(self.mt[i][j]
 Updater = Class{
 	init = function(self, x, y)
 	self.x = x
@@ -94,11 +94,11 @@ function love.load()
 	
 end
 
-function.love.mousepressed (x, y, button)
-	if button == "l" then
-		lifeLand:check(x,y)
-		end
-	end
+function love.mousepressed (x, y, button)
+	--if button == "l" then
+	--	lifeLand:check(x,y)
+	--	end
+	--end
 end
 	
 function love.update(dt)
