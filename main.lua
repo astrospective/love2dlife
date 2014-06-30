@@ -1,22 +1,21 @@
 Gamestate = require "libs.hump.gamestate"
 Class = require "libs.hump.class"
+Timer = require "libs.hump.timer"
+
 Cube =  Class{
 	init = function(self, x, y, state)
 	self.x = x
 	self.y = y
 	self.state = state
 	self.lastState = 0
+	self.count = 0
 	end
 }
-function Cube:onClick()
-	if self.state == 0 then
-		self.state = 1
-	else self.state = 0
-	end
-end
 
 function Cube:update()
 	self.lastState = self.state
+	return self.lastState
+		
 end
 Grid = Class{
 	init = function(self, x, y)
@@ -26,12 +25,20 @@ Grid = Class{
 	for i=1,x do
 		self.mt[i] = {}
 		for j=1,y do
-		self.mt[i][j] = Cube(i,j, 0)
+			self.mt[i][j] = Cube(i,j, 0)
 		end
 	end
 end
 }
 
+function Grid:update()
+	for i=1,self.x,1 do
+		for j=1,self.y,1 do
+			if(self.mt[i][j]:update()) then
+				
+		end
+	end
+end
 function Grid:draw()
 	for i=1,self.x,1 do
 		for j=1,self.y,1 do
@@ -41,7 +48,7 @@ function Grid:draw()
 			elseif(self.mt[i][j].state == 1) then
 				love.graphics.setColor (0,0,0)
 				love.graphics.rectangle("fill", i*20, j*20, 20, 20)
-				end
+			end
 		end
 	end
 end
@@ -80,6 +87,7 @@ function paused:draw()
 end
 
 function running:init()
+	Timer.addPeriodic(1, lifeLand:update())
 end
 function running:keyreleased(key)
 	if key == 'down' then
@@ -97,13 +105,14 @@ function running:draw()
 end
 function love.load()
 	Gamestate.registerEvents()
+	--love.window.setFullscreen(true, "desktop")
 	lifeLand = Grid(30,30)
 	Gamestate.switch(paused)
 	
 end
 
 function love.update(dt)
-
+	Timer.update(dt)
 
 end
 
