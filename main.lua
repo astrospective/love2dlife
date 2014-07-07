@@ -1,74 +1,149 @@
 Gamestate = require "libs.hump.gamestate"
 Class = require "libs.hump.class"
-Timer = require "libs.hump.timer"
+--Timer = require "libs.hump.timer"
 
-Cube =  Class{
-	init = function(self, x, y, state)
-	self.x = x
-	self.y = y
-	self.state = state
-	self.lastState = 0
-	self.count = 0
+Cell = Class{
+	init = function(self,state)
+		self.state = state
+		self.lastState = 0
+		return(self)
+	end,
+	update = function(self)
+		self.lastState = self.state
+		--return self.lastState
+	end,
+	setState = function(self, state)
+		self.state = state
+	end,
+	getState = function(self)
+		return self.state
+	end;
+	getLastState = function(self)
+		local value = self.lastState
+		return value
+	end;
+	generate = function(self, count)
+		if self.lastState == 1 then
+			if count < 2 then	
+				self.state = 0
+			elseif count > 3 then
+				self.state = 0
+			end
+		end
+		if self.lastState == 0 then
+			if count == 3 then
+				self.state = 1
+			end
+		end
 	end
 }
 
-function Cube:update()
-	self.lastState = self.state
-	return self.lastState
-		
-end
 Grid = Class{
 	init = function(self, x, y)
-	self.x = x
-	self.y = y
-	self.mt = {}
-	for i=1,x do
-		self.mt[i] = {}
-		for j=1,y do
-			self.mt[i][j] = Cube(i,j, 0)
-		end
-	end
-end
-}
-
-function Grid:update()
-	for i=1,self.x,1 do
-		for j=1,self.y,1 do
-			if(self.mt[i][j]:update()) then
-				
-		end
-	end
-end
-function Grid:draw()
-	for i=1,self.x,1 do
-		for j=1,self.y,1 do
-			if(self.mt[i][j].state == 0) then
-				love.graphics.setColor (255, 255, 255)
-				love.graphics.rectangle("fill", i*20, j*20, 20, 20)
-			elseif(self.mt[i][j].state == 1) then
-				love.graphics.setColor (0,0,0)
-				love.graphics.rectangle("fill", i*20, j*20, 20, 20)
+		self.x = x
+		self.y = y
+		self.mt = {}
+		for i=1,x do
+			self.mt[i] = {}
+			for j=1,y do
+				self.mt[i][j] = Cell(0)
 			end
 		end
-	end
-end
-
-function Grid:check(x,y)
-	if x > 20 and x < self.x * 20 then
-		if y > 20 and y < self.y * 20 then
-			if self.mt[math.floor(x/20)][math.floor(y/20)].state == 0 then	
-				self.mt[math.floor(x/20)][math.floor(y/20)].state = 10
-			else
-				self.mt[math.floor(x/20)][math.floor(y/20)].state = 0
+	end;
+	draw = function(self)
+		for i=1,self.x,1 do
+			for j=1,self.y,1 do
+				if(self.mt[i][j]:getState() == 0) then
+					love.graphics.setColor (255, 255, 255)
+					love.graphics.rectangle("fill", i*20, j*20, 20, 20)
+				elseif(self.mt[i][j]:getState() == 1) then
+					love.graphics.setColor (0,0,0)
+					love.graphics.rectangle("fill", i*20, j*20, 20, 20)
+				end
 			end
 		end
-	end
-end
-Updater = Class{
-	init = function(self, x, y)
-	self.x = x
-	self.y = y
-	end
+	end;
+	update = function(self)
+		for i=1,self.x do
+			for j=1,self.y do
+				self.mt[i][j]:update()
+			end
+		end
+		--do the corners
+		count = 0
+		count = count + self.mt[2][2]:getLastState() + self.mt[1][2]:getLastState() + self.mt[2][1]:getLastState()
+		self.mt[1][1]:generate(count)
+    print(count)
+		count = 0
+		count = count + self.mt[1][self.y-1]:getLastState() + self.mt[2][self.y]:getLastState() + self.mt[2][self.y-1]:getLastState()
+		self.mt[1][self.y]:generate(count)
+		count = 0
+		count = count + self.mt[self.x-1][1]:getLastState() + self.mt[self.x][2]:getLastState() + self.mt[self.x-1][2]:getLastState()
+		self.mt[self.x][1]:generate(count)
+		count = 0
+		count = count + self.mt[self.x-1][self.y-1]:getLastState() + self.mt[self.x-1][self.y]:getLastState() + self.mt[self.x][self.y-1]:getLastState()
+		self.mt[self.x][self.y]:generate(count)
+		--do the rest
+		--first row
+		for	i=0,37,1 do
+			count = 0
+			--count = count + self.mt[1][1+i]:getLastState() + self.mt[2][1+i]:getLastState() + self.mt[2][2+i]getLastState() + self.mt[1][3+i]:getLastState() + self.mt[2][3+i]getLastState()
+			count = count + self.mt[1][1+i]:getLastState()
+			count = count + self.mt[2][1+i]:getLastState()
+			count = count + self.mt[2][2+i]:getLastState()
+			count = count + self.mt[1][3+i]:getLastState()
+			count = count + self.mt[2][3+i]:getLastState()
+			self.mt[1][2+i]:generate(count)
+		end
+		--first column
+		for i=0,37,1 do
+			count = 0
+			count = count + self.mt[1+i][1]:getLastState() 
+			count = count + self.mt[3+i][1]:getLastState() 
+			count = count + self.mt[1+1][2]:getLastState()
+			count = count + self.mt[2+i][2]:getLastState()
+			count = count + self.mt[3+i][2]:getLastState()
+			self.mt[2+i][1]:generate(count)
+		end
+		--last row
+		for i=0,37,1 do
+			count = 0
+			count = count + self.mt[self.x-1][1+i]:getLastState() + self.mt[self.x-1][2+i]:getLastState() + self.mt[self.x-1][3+i]:getLastState() + self.mt[self.x][1+i]:getLastState() + self.mt[self.x][3+i]:getLastState()
+			self.mt[self.x][2+i]:generate(count)
+		end
+		--last column
+		for i=0,37,1 do
+			count = 0
+			count = count + self.mt[1+i][self.y-1]:getLastState() + self.mt[2+i][self.y-1]:getLastState() + self.mt[3+i][self.y-1]:getLastState() + self.mt[1+i][self.y]:getLastState() self.mt[3+i][self.y]:getLastState()
+			self.mt[2+i][self.y]:generate(count)
+		end
+		for i=2,self.x-1 do
+			for j=2,self.y-1 do
+				count = 0
+				count = count + self.mt[i-1][j-1]:getLastState()
+				count = count + self.mt[i-1][j]:getLastState()
+				count = count + self.mt[i-1][j+1]:getLastState() 
+				count = count + self.mt[i][j-1]:getLastState() 
+				count = count + self.mt[i][j+1]:getLastState() 
+				count = count + self.mt[i+1][j-1]:getLastState() 
+				count = count + self.mt[i+1][j]:getLastState() 
+				count = count + self.mt[i+1][j+1]:getLastState()
+				self.mt[i][j]:generate(count)
+			end
+		end
+	return(1)
+	end;
+	check = function(self,x,y)
+		if x >= 20 and x <= (self.x * 20) then
+			if y >= 20 and y <= (self.y * 20) then
+				if self.mt[math.floor(x/20)][math.floor(y/20)]:getState() == 0 then	
+					self.mt[math.floor(x/20)][math.floor(y/20)]:setState(1)
+				else
+					self.mt[math.floor(x/20)][math.floor(y/20)]:setState(0)
+				end
+			end
+		end
+	end;
 }
 
 local running = {}
@@ -82,12 +157,12 @@ function paused:keyreleased(key)
 	end
 end
 function paused:draw()
-	love.graphics.print("Press space to begin",10,8)
+	love.graphics.print("Press up to begin,click to toggle",10,8)
 	lifeLand:draw()
 end
 
 function running:init()
-	Timer.addPeriodic(1, lifeLand:update())
+	--Timer.addPeriodic(1, lifeLand:update())
 end
 function running:keyreleased(key)
 	if key == 'down' then
@@ -95,25 +170,28 @@ function running:keyreleased(key)
 	end
 end
 function paused:mousepressed(x,y, mouse_btn)
+  --print(x)
+  --print(y)
 	if mouse_btn == 'l' then
 		lifeLand:check(x,y)
 	end
 end
 function running:draw()
-	love.graphics.print("Game Running do stuff here",10,8)
+	love.graphics.print("Press Down to Pause",10,8)
 	lifeLand:draw()
 end
 function love.load()
 	Gamestate.registerEvents()
-	--love.window.setFullscreen(true, "desktop")
-	lifeLand = Grid(30,30)
+	love.window.setMode (840, 840)
+	lifeLand = Grid(40,40)
 	Gamestate.switch(paused)
 	
 end
-
-function love.update(dt)
-	Timer.update(dt)
-
+time = 0
+function running:update(dt)
+  time = time + dt
+  if time >= 1 then
+    time = 0
+    lifeLand:update()
+  end
 end
-
-
