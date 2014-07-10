@@ -105,16 +105,16 @@ Grid = Class{
 			count = count + self.mt[2+i][2]:getLastState()
 			self.mt[1+i][1]:generate(count)
 		end
-		--last row
+		--last column
 		for i=1,self.y-2,1 do
 			count = 0
 			count = count + self.mt[self.x-1][i]:getLastState() + self.mt[self.x-1][1+i]:getLastState() + self.mt[self.x-1][2+i]:getLastState() + self.mt[self.x][i]:getLastState() + self.mt[self.x][2+i]:getLastState()
 			self.mt[self.x][1+i]:generate(count)
 		end
-		--last column
+		--last row
 		for i=1,self.x-2,1 do
 			count = 0
-			count = count + self.mt[i][self.y-1]:getLastState() + self.mt[1+i][self.y-1]:getLastState() + self.mt[2+i][self.y-1]:getLastState() + self.mt[i][self.y]:getLastState() self.mt[2+i][self.y]:getLastState()
+			count = count + self.mt[i][self.y-1]:getLastState() + self.mt[1+i][self.y-1]:getLastState() + self.mt[2+i][self.y-1]:getLastState() + self.mt[i][self.y]:getLastState() + self.mt[2+i][self.y]:getLastState()
 			self.mt[1+i][self.y]:generate(count)
 		end
 		for i=2,self.x-1 do
@@ -196,3 +196,4 @@ function running:update(dt)
     lifeLand:update()
   end
 end
+
