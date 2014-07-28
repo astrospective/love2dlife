@@ -1,7 +1,38 @@
 Gamestate = require "libs.hump.gamestate"
 Class = require "libs.hump.class"
---Timer = require "libs.hump.timer"
+font = love.graphics.newFont("kenpixel.ttf",30)
+buttonUp = love.graphics.newImage('blue_button00.png')
+buttonDown = love.graphics.newImage('blue_button01.png')
+Signals = require "libs.hump.signal"
 
+Button = Class{
+  init = function(self, label, x, y)
+    self.x = x
+    self.y = y
+    self.label = label
+    self.state = 0
+   end,
+  onRelease = function(self)
+    Signals.emit(self.label)
+    self.state = 0
+  end,
+  onClick = function(self)
+    self.state = 1
+  end,
+  
+  draw = function(self)
+    love.graphics.setFont(font)
+    
+    if self.state == 0 then
+      love.graphics.draw(buttonUp,self.x,self.y)
+    end
+    if self.state == 1 then
+       love.graphics.draw(buttonDown,self.x,self.y+1)
+     end
+     love.graphics.print(self.label,self.x+60,self.y)
+  end,
+}
+   
 --Cell = Class{
 --	init = function(self,state)
 --		self.state = state
@@ -217,6 +248,7 @@ function paused:mousepressed(x,y, mouse_btn)
   --print(x)
   --print(y)
 	if mouse_btn == 'l' then
+    
 		lifeLand:check(x,y)
 	end
 end
@@ -227,10 +259,27 @@ end
 function love.load()
 	Gamestate.registerEvents()
 	--love.window.setMode (840, 840)
-	lifeLand = Grid(1024,1024)
-	Gamestate.switch(paused)
+	--lifeLand = Grid(1024,1024)
+	Gamestate.switch(mainMenu)
 	
 end
+function mainMenu:init()
+  newButton = Button('New',10,10)
+  Signals.register('New', function()
+      lifeLand = Grid(1024,1024)
+      Gamestate.switch(paused)
+      end)
+end
+function mainMenu:draw()
+  newButton:draw()
+end
+function mainMenu:mousepressed(x,y, mouse_btn)
+    newButton:onClick()
+  end
+function mainMenu:mousereleased(x,y, mouse_btn)
+  newButton:onRelease()
+end
+
 time = 0
 function running:update(dt)
   time = time + dt
